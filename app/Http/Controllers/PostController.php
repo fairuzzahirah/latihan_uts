@@ -12,6 +12,8 @@ use Illuminate\Http\RedirectResponse;
 
 //import Facade "Storage"
 use Illuminate\Support\Facades\Storage;
+use App\Models\Post;
+
 
 class PostController extends Controller
 {
@@ -22,8 +24,8 @@ class PostController extends Controller
      */
     public function index(): View
     {
-        //get posts
-        Post::latest()->paginate(5);
+        // //get posts
+        $posts = Post::latest()->paginate(5);
 
         //render view with posts
         return view('posts.index', compact('posts'));
@@ -36,7 +38,7 @@ class PostController extends Controller
      */
     public function create(): View
     {
-        return view('create');
+        return view('posts.create');
     }
 
     /**
@@ -46,7 +48,7 @@ class PostController extends Controller
      * @return RedirectResponse
      */
 
-    public function store($request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         //validate form
         $this->validate($request, [
@@ -63,7 +65,7 @@ class PostController extends Controller
         Post::create([
             'image'     => $image->hashName(),
             'title'     => $request->title,
-            'content'   => $request->content
+            'content'   => $request->content,
         ]);
 
         //redirect to index
@@ -76,13 +78,13 @@ class PostController extends Controller
      * @param  mixed $id
      * @return View
      */
-    public function show(): View
+    public function show($id): View
     {
         //get post by ID
         $post = Post::findOrFail($id);
 
         //render view with post
-        return view('posts.show', ('post'));
+        return view('posts.show', compact('post'));
     }
 
     /**
@@ -97,7 +99,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
 
         //render view with post
-        return view('posts.edit', compact('postsss'));
+        return view('posts.edit', compact('post'));
     }
 
     /**
@@ -131,7 +133,7 @@ class PostController extends Controller
 
             //update post with new image
             $post->update([
-                'images'     => $image->hashName(),
+                'image'     => $image->hashName(),
                 'title'     => $request->title,
                 'content'   => $request->content
             ]);
@@ -165,7 +167,7 @@ class PostController extends Controller
         Storage::delete('public/po  sts/'. $post->image);
 
         //delete post
-        $post->deled();
+        $post->delete();
 
         //redirect to index
         return redirect()->route('posts.index')->with(['success' => 'Data Berhasil Dihapus!']);
